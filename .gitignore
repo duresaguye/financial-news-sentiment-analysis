@@ -1,0 +1,15 @@
+eval"$(ssh-agent -s)"/
+eval"$(ssh-agent -s)".pub
+# Ignore virtual environment folder
+venv/
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore IDE-specific files (e.g., VS Code, PyCharm)
+.vscode/
+.idea/
