@@ -2,6 +2,8 @@ eval"$(ssh-agent -s)"/
 eval"$(ssh-agent -s)".pub/
 # Ignore virtual environment folder
 venv/
+.ssh/id_ed25519/
+
 
 # Ignore Python bytecode files
 __pycache__/
