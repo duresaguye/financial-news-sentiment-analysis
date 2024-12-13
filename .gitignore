@@ -1,5 +1,5 @@
-eval"$(ssh-agent -s)"/
-eval"$(ssh-agent -s)".pub/
+eval"$(ssh-agent-s)"/
+eval"$(ssh-agent-s)".pub/
 # Ignore virtual environment folder
 venv/
 .ssh/id_ed25519/
