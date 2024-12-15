@@ -1,137 +1,131 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
+import pandas as pd
+import pandas_ta as ta
+import talib
 import streamlit as st
-from wordcloud import WordCloud
-from sklearn.feature_extraction.text import CountVectorizer
-from textblob import TextBlob
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Display title and description
-st.title('Financial News Sentiment Analysis and Stock Data')
-st.write("""
-This web app analyzes financial news and stock price trends using sentiment analysis and exploratory data analysis.
-""")
+from pynance import Stock
 
-# Load news data
-news_data_path = os.path.abspath('./data/news_data.csv')
-st.write(f"News Data Path: {news_data_path}")
-news_df = pd.read_csv(news_data_path)
-
-# Load stock data
+# Load stock data (ensure it includes columns Open, High, Low, Close, Volume)
 stock_files = [
     'AAPL_historical_data.csv', 'AMZN_historical_data.csv',
     'META_historical_data.csv', 'MSFT_historical_data.csv',
-    'NVDA_historical_data.csv', 'TSLA_historical_data.csv'
+    'NVDA_historical_data.csv', 'TSLA_historical_data.csv',
+    'GOOGL_historical_data.csv'
 ]
+
+# List to store individual stock dataframes
 stock_df_list = []
 for file in stock_files:
-    df = pd.read_csv(os.path.join('./data/yfinance_data', file))
-    df['stock_symbol'] = file.split('_')[0].upper()  # Extract stock symbol from file name
-    stock_df_list.append(df)
+    # Load stock data
+    file_path = os.path.join('./data/yfinance_data', file)
+    df = pd.read_csv(file_path)
+    
+    # Ensure the file has the required columns (Open, High, Low, Close, Volume)
+    if all(col in df.columns for col in ['Open', 'High', 'Low', 'Close', 'Volume']):
+        # Add stock symbol as a new column
+        df['stock_symbol'] = file.split('_')[0].upper()  # Extract stock symbol from file name
+        
+        # Add the dataframe to the list
+        stock_df_list.append(df)
+    else:
+        st.write(f"Warning: Missing required columns in {file}")
+
+# Combine all stock dataframes into a single dataframe
 stock_df = pd.concat(stock_df_list, ignore_index=True)
 
-# Show basic data information
-st.subheader('News Data Info')
-st.write(news_df.info())
-st.subheader('Stock Data Info')
-st.write(stock_df.info())
-
-# Display first few rows of news and stock data
-st.subheader('News Data Head')
-st.write(news_df.head())
-
-st.subheader('Stock Data Head')
+# Display first few rows of the loaded stock data
+st.write("Stock Data Overview:")
 st.write(stock_df.head())
 
-# Sentiment Analysis
-st.subheader('Sentiment Analysis of Headlines')
-if 'headline' in news_df.columns:
-    def calculate_sentiment(text):
-        analysis = TextBlob(text)
-        return analysis.sentiment.polarity  # Polarity ranges from -1 (negative) to 1 (positive)
+# Apply Technical Indicators (Example: SMA, RSI, MACD)
+# SMA: Simple Moving Average
+stock_df['SMA_50'] = ta.sma(stock_df['Close'], timeperiod=50)
+stock_df['SMA_200'] = ta.sma(stock_df['Close'], timeperiod=200)
 
-    news_df['sentiment'] = news_df['headline'].apply(calculate_sentiment)
-    st.write("Sentiment scores added to news data.")
+# RSI: Relative Strength Index
+stock_df['RSI_14'] = ta.rsi(stock_df['Close'], timeperiod=14)
 
-    # Sentiment Distribution
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.histplot(news_df['sentiment'], kde=True, bins=20, color='skyblue', ax=ax)
-    ax.set_title('Sentiment Score Distribution')
-    ax.set_xlabel('Sentiment Score')
-    ax.set_ylabel('Frequency')
-    st.pyplot(fig)
+# MACD: Moving Average Convergence Divergence
+macd, macd_signal, macd_hist = talib.MACD(stock_df['Close'], fastperiod=12, slowperiod=26, signalperiod=9)
+stock_df['MACD'] = macd
+stock_df['MACD_Signal'] = macd_signal
+stock_df['MACD_Hist'] = macd_hist
 
-# Descriptive Statistics
-st.subheader('Descriptive Statistics')
-if 'headline' in news_df.columns:
-    news_df['headline_length'] = news_df['headline'].str.len()
-    st.write(news_df[['headline', 'headline_length']].describe())
-    st.write("Average Headline Length:", news_df['headline_length'].mean())
+# Display the stock data with calculated indicators
+st.write("Stock Data with Technical Indicators (SMA, RSI, MACD):")
+st.write(stock_df[['stock_symbol', 'Date', 'Close', 'SMA_50', 'SMA_200', 'RSI_14', 'MACD', 'MACD_Signal', 'MACD_Hist']].tail())
 
-    # Count articles per publisher
-    publisher_counts = news_df['publisher'].value_counts()
-    st.write("Top Publishers:")
-    st.bar_chart(publisher_counts.head(10))
+# Visualizing the stock data and technical indicators
 
-    # Analyze publication dates
-    if 'date' in news_df.columns:
-        try:
-            # Attempt to parse the date with a flexible approach
-            news_df['date'] = pd.to_datetime(news_df['date'], format='mixed', utc=True, errors='coerce')
-            st.write("Date parsing successful. Example dates:")
-            st.write(news_df['date'].head())
-        except Exception as e:
-            st.error(f"Error parsing dates: {e}")
+# Select a stock symbol for visualization (Example: AAPL)
+stock_symbol = 'AAPL'  # Modify as per your need
+stock_symbol_df = stock_df[stock_df['stock_symbol'] == stock_symbol]
 
-        # Handle missing or invalid dates
-        if news_df['date'].isnull().any():
-            st.warning("Some dates could not be parsed. Replacing invalid dates with NaT.")
-            news_df['date'] = pd.to_datetime(news_df['date'], errors='coerce')
+# Plot Close price and SMAs
+plt.figure(figsize=(10, 6))
+plt.plot(stock_symbol_df['Date'], stock_symbol_df['Close'], label='Close Price', color='blue')
+plt.plot(stock_symbol_df['Date'], stock_symbol_df['SMA_50'], label='50-day SMA', color='red', linestyle='--')
+plt.plot(stock_symbol_df['Date'], stock_symbol_df['SMA_200'], label='200-day SMA', color='green', linestyle='--')
 
-        news_df['day_of_week'] = news_df['date'].dt.day_name()
-        date_counts = news_df['date'].dt.date.value_counts().sort_index()
-        st.line_chart(date_counts)
+plt.title(f'{stock_symbol} Stock Price with SMA')
+plt.xlabel('Date')
+plt.ylabel('Price')
+plt.legend(loc='upper left')
+plt.xticks(rotation=45)
+plt.tight_layout()
 
-# Word Cloud for Headlines
-st.subheader('Common Words in Headlines')
-headline_text = " ".join(news_df['headline'].dropna())
-wordcloud = WordCloud(width=800, height=400, background_color='white').generate(headline_text)
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.imshow(wordcloud, interpolation='bilinear')
-ax.axis('off')
-st.pyplot(fig)
+# Display the plot in Streamlit
+st.pyplot(plt)
 
-# Time Series Analysis
-st.subheader('Publication Frequency Over Time')
-if 'date' in news_df.columns:
-    st.line_chart(news_df['date'].dt.date.value_counts().sort_index())
+# Plot RSI
+plt.figure(figsize=(10, 4))
+plt.plot(stock_symbol_df['Date'], stock_symbol_df['RSI_14'], label='RSI 14', color='orange')
+plt.axhline(70, color='red', linestyle='--', label='Overbought (70)')
+plt.axhline(30, color='green', linestyle='--', label='Oversold (30)')
+plt.title(f'{stock_symbol} RSI (14)')
+plt.xlabel('Date')
+plt.ylabel('RSI')
+plt.legend(loc='upper left')
+plt.xticks(rotation=45)
+plt.tight_layout()
 
-# Topic Modeling (Keywords Extraction)
-st.subheader('Topic Modeling')
-vectorizer = CountVectorizer(stop_words='english', max_features=20)
-X = vectorizer.fit_transform(news_df['headline'].dropna())
-keywords = vectorizer.get_feature_names_out()
-st.write("Top Keywords in Headlines:", keywords)
+# Display the RSI plot in Streamlit
+st.pyplot(plt)
 
-# Plot stock closing price trends
-st.subheader('Stock Price Trends')
-stock_df['Date'] = pd.to_datetime(stock_df['Date'])
-fig, ax = plt.subplots(figsize=(14, 7))
-for stock in stock_df['stock_symbol'].unique():
-    stock_subset = stock_df[stock_df['stock_symbol'] == stock]
-    ax.plot(stock_subset['Date'], stock_subset['Close'], label=stock)
+# Plot MACD
+plt.figure(figsize=(10, 6))
+plt.plot(stock_symbol_df['Date'], stock_symbol_df['MACD'], label='MACD', color='blue')
+plt.plot(stock_symbol_df['Date'], stock_symbol_df['MACD_Signal'], label='MACD Signal', color='red', linestyle='--')
+plt.bar(stock_symbol_df['Date'], stock_symbol_df['MACD_Hist'], label='MACD Histogram', color='green', alpha=0.3)
+plt.title(f'{stock_symbol} MACD')
+plt.xlabel('Date')
+plt.ylabel('MACD Value')
+plt.legend(loc='upper left')
+plt.xticks(rotation=45)
+plt.tight_layout()
 
-ax.set_title('Stock Closing Prices Over Time')
-ax.set_xlabel('Date')
-ax.set_ylabel('Closing Price')
-ax.legend()
-st.pyplot(fig)
+# Display the MACD plot in Streamlit
+st.pyplot(plt)
 
-# Analyze publisher activity
-st.subheader('Publisher Analysis')
-if 'publisher' in news_df.columns:
-    news_df['email_domain'] = news_df['publisher'].str.extract(r'@([\w\.-]+)')
-    domain_counts = news_df['email_domain'].value_counts()
-    st.write("Top Email Domains Contributing to News:")
-    st.bar_chart(domain_counts.head(10))
+# Incorporate PyNance for Financial Metrics
+
+# Using PyNance to calculate PE Ratio, PB Ratio, etc.
+# Example: Use PyNance to fetch stock info and calculate PE and PB Ratios
+
+stock_info = Stock(stock_symbol).info()
+
+# Fetch PE Ratio, PB Ratio, and other metrics
+pe_ratio = stock_info.get('peRatio', 'N/A')
+pb_ratio = stock_info.get('priceToBook', 'N/A')
+market_cap = stock_info.get('marketCap', 'N/A')
+
+# Display these metrics in the Streamlit app
+st.write(f"Financial Metrics for {stock_symbol}:")
+st.write(f"PE Ratio: {pe_ratio}")
+st.write(f"PB Ratio: {pb_ratio}")
+st.write(f"Market Cap: {market_cap}")
+
+# Optionally, you can calculate other metrics like Dividend Yield, Beta, etc. using PyNance.
