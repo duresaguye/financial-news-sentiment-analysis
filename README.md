@@ -1,76 +1,70 @@
-Financial News Sentiment Analysis
-
-This project is focused on analyzing financial news data and predicting market sentiment. The dataset includes news articles with corresponding stock symbols and sentiment analysis. The project merges financial news with stock data to determine how news headlines impact stock market behavior.
+Financial News and Stock Price Analysis
 Project Overview
 
-This repository contains the code for a financial news sentiment analysis system. The system processes a large dataset of news headlines and stock data, applying machine learning techniques to predict sentiment trends. The dataset includes news articles from various publishers, stock data for specific companies, and a combination of both to help analyze how news impacts stock prices.
-Features
+This project analyzes the relationship between financial news sentiment and stock market movements. Using sentiment analysis and statistical methods, it aims to uncover how the tone of financial news impacts stock prices and to develop data-driven investment strategies.
+Objectives
 
-    Data Processing:
-        News data and stock data are preprocessed for analysis, ensuring clean and structured data.
-        Stock data includes attributes like opening, closing, and adjusted prices, volume, and dividends.
-        News data includes headline, URL, publisher, date, and associated stock symbols.
+    Sentiment Analysis: Quantify the tone of financial news headlines to understand their emotional context.
+    Correlation Analysis: Identify statistical correlations between news sentiment and stock price movements.
+    Predictive Strategies: Leverage sentiment insights to recommend actionable investment strategies.
 
-    Sentiment Analysis:
-        Apply sentiment analysis to classify the headlines into positive, negative, or neutral categories.
-        Predict the sentiment based on historical stock performance and market trends.
+Data
 
-    Data Merging:
-        Merge news data with stock data based on stock symbols and dates.
-        This helps in analyzing how news events correlate with stock market movements.
+The dataset contains the following fields:
 
-Dataset Information
-News Data
+    headline: Title of the news article
+    url: Link to the full news article
+    publisher: Author/creator of the article
+    date: Publication date and time (UTC-4 timezone)
+    stock: Stock ticker symbol
 
-    Total Entries: 1,407,328
-    Columns:
-        Unnamed: 0 (ID)
-        headline (News headline)
-        url (Link to the news article)
-        publisher (Name of the publisher)
-        date (Date of the news article)
-        stock (Stock symbol associated with the news)
+Tasks
 
-Stock Data
-
-    Total Entries: 40,408
-    Columns:
-        Date (Date of stock data)
-        Open, High, Low, Close (Stock prices for the day)
-        Adj Close (Adjusted closing price)
-        Volume (Amount of stock traded)
-        Dividends, Stock Splits (Stock-related events)
-        stock_symbol (Stock symbol for the company)
+    Setup and Git Management: Configure the development environment and use Git for version control.
+    Quantitative Analysis: Explore financial data using technical indicators and visualizations.
+    Correlation Analysis: Align stock and news datasets, perform sentiment analysis, and analyze relationships between sentiment and stock returns.
 
 Getting Started
 
-To get started with the project, clone this repository:
+    Clone the Repository
 
-git clone https://github.com/duresaguye/financial-news-sentiment-analysis.git
+git clone https://github.com/duresaguye/financial-news-sentiment-analysis  
+cd financial-news-sentiment-analysis  
 
+Create a Virtual Environment
+To isolate project dependencies, create a virtual environment:
 
-Installation
+python -m venv venv  
 
-    Navigate to the project directory:
+Activate the Virtual Environment
 
-cd financial-news-sentiment-analysis
+    On Windows:
 
-    Create a virtual environment:
-
-python -m venv venv
-
-    Activate the virtual environment:
-        On Windows:
-
-.\venv\Scripts\activate
+venv\Scripts\activate  
 
 On macOS/Linux:
 
-        source venv/bin/activate
+    source venv/bin/activate  
 
-    Install the required packages:
+Install Dependencies
+Install the required libraries by running:
 
-pip install -r requirements.txt
+pip install -r requirements.txt  
 
+Run the Application with Streamlit
+The project contains multiple scripts for different analysis tasks. You can run each script individually with Streamlit:
 
+    Exploratory Data Analysis (EDA)
+
+streamlit run scripts/taks_1_eda.py  
+
+Correlation between News Sentiment and Stock Movement
+
+streamlit run scripts/Correlation_between_news_and_stock_movement.py  
+
+Quantitative Analysis
+
+        streamlit run scripts/quantitative_analysis.py  
+
+    Each of these scripts will open in your browser, and you can interact with the corresponding analysis.
 
