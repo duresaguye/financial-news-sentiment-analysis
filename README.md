@@ -20,7 +20,7 @@ The dataset contains the following fields:
 
 Tasks
 
-    Setup and Git Management: Configure the development environment and use Git for version control.
+    
     Quantitative Analysis: Explore financial data using technical indicators and visualizations.
     Correlation Analysis: Align stock and news datasets, perform sentiment analysis, and analyze relationships between sentiment and stock returns.
 
