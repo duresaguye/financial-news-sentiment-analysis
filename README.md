@@ -38,9 +38,9 @@ python -m venv venv
 
 Activate the Virtual Environment
 
-    On Windows:
+On Windows:
 
-venv\Scripts\activate  
+    venv\Scripts\activate  
 
 On macOS/Linux:
 
@@ -66,5 +66,5 @@ Quantitative Analysis
 
         streamlit run scripts/quantitative_analysis.py  
 
-    Each of these scripts will open in your browser, and you can interact with the corresponding analysis.
+Each of these scripts will open in your browser, and you can interact with the corresponding analysis.
 
