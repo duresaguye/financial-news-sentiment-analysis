@@ -54,13 +54,13 @@ pip install -r requirements.txt
 Run the Application with Streamlit
 The project contains multiple scripts for different analysis tasks. You can run each script individually with Streamlit:
 
-    Exploratory Data Analysis (EDA)
+Exploratory Data Analysis (EDA)
 
-streamlit run scripts/taks_1_eda.py  
+     streamlit run scripts/taks_1_eda.py  
 
 Correlation between News Sentiment and Stock Movement
 
-streamlit run scripts/Correlation_between_news_and_stock_movement.py  
+    streamlit run scripts/Correlation_between_news_and_stock_movement.py  
 
 Quantitative Analysis
 
